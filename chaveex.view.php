@@ -23,6 +23,9 @@
  * Note: if the HTML of your game interface is always the same, you don't have to place anything here.
  *
  */
+
+
+ // continu with https://en.doc.boardgamearena.com/Tutorial_hearts
   
 require_once( APP_BASE_PATH."view/common/game.view.php" );
   
@@ -42,6 +45,22 @@ class view_chaveex_chaveex extends game_view
 
         /*********** Place your code below:  ************/
 
+
+        $template = self::getGameName() . "_" . self::getGameName();
+        
+        $directions = array( 'S', 'W', 'N', 'E' );
+        
+        // this will inflate our player block with actual players data
+        $this->page->begin_block($template, "player");
+        foreach ( $players as $player_id => $info ) {
+            $dir = array_shift($directions);
+            $this->page->insert_block("player", array ("PLAYER_ID" => $player_id,
+                    "PLAYER_NAME" => $players [$player_id] ['player_name'],
+                    "PLAYER_COLOR" => $players [$player_id] ['player_color'],
+                    "DIR" => $dir ));
+        }
+        // this will make our My Hand text translatable
+        $this->tpl['MY_HAND'] = self::_("My hand");
 
         /*
         
