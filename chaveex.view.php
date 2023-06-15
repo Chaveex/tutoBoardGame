@@ -23,6 +23,9 @@
  * Note: if the HTML of your game interface is always the same, you don't have to place anything here.
  *
  */
+
+
+ // continu with https://en.doc.boardgamearena.com/Tutorial_hearts
   
 require_once( APP_BASE_PATH."view/common/game.view.php" );
   

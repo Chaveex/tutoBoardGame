@@ -18,16 +18,21 @@
 define([
     "dojo","dojo/_base/declare",
     "ebg/core/gamegui",
-    "ebg/counter"
+    "ebg/counter",
+    "ebg/stock"  
 ],
 function (dojo, declare) {
     return declare("bgagame.chaveex", ebg.core.gamegui, {
         constructor: function(){
             console.log('chaveex constructor');
+            this.cardwidth = 72;
+            this.cardheight = 96;
               
             // Here, you can init the global variables of your user interface
             // Example:
             // this.myGlobalValue = 0;
+
+
 
         },
         
@@ -43,11 +48,40 @@ function (dojo, declare) {
             
             "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
         */
-        
+
+        // Get card unique identifier based on its color and value
+
         setup: function( gamedatas )
         {
             console.log( "Starting game setup" );
+
+                        // TODO: Set up your game interface here, according to "gamedatas"
+
+            // Player hand
+            this.playerHand = new ebg.stock(); // new stock object for hand
+            dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
+            this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
+
+            /*Then, we must tell the stock what items it is going to display during its life: the 52 cards of a standard card game from a CSS sprite image named "cards.jpg" with all the cards arranged in 4 rows and 13 columns.
+
+            Here's how we tell stock what item types to display: 
+            */
+            this.playerHand.image_items_per_row = 13; // 13 images per row
+            // 2 = hearts, 5 is 5, and 42 is the card id, which normally would come from db
+
+
             
+            // Create cards types:
+            for (var color = 1; color <= 4; color++) {
+                for (var value = 2; value <= 14; value++) {
+                    // Build card type id
+                    var card_type_id = this.getCardUniqueId(color, value);
+                    this.playerHand.addItemType(card_type_id, card_type_id, g_gamethemeurl + 'img/cards.jpg', card_type_id);
+                }
+            }
+
+            this.playerHand.addToStockWithId( this.getCardUniqueId( 2, 5 ), 42 );
+
             // Setting up player boards
             for( var player_id in gamedatas.players )
             {
@@ -158,6 +192,11 @@ function (dojo, declare) {
         
         */
 
+        getCardUniqueId : function(color, value) {
+            return (color - 1) * 13 + (value - 2);
+        },
+            
+
 
         ///////////////////////////////////////////////////
         //// Player's action
@@ -172,6 +211,24 @@ function (dojo, declare) {
             _ make a call to the game server
         
         */
+        onPlayerHandSelectionChanged: function() {
+            var items = this.playerHand.getSelectedItems();
+
+            if (items.length > 0) {
+                if (this.checkAction('playCard', true)) {
+                    // Can play a card
+
+                    var card_id = items[0].id;
+                    console.log("on playCard "+card_id);
+
+                    this.playerHand.unselectAll();
+                } else if (this.checkAction('giveCards')) {
+                    // Can give cards => let the player select some cards
+                } else {
+                    this.playerHand.unselectAll();
+                }
+            }
+        },
         
         /* Example:
         
